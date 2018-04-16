@@ -2,10 +2,11 @@
 
 A helper for 9-cat leagues.
 
-## Approximate total ranking list, done using total standard deviations.
+## Approximate total ranking list, done using sum of total standard deviations in all 9 categories
 
-Note that it uses the best stat category from the last 3 seasons, so that's why guys who
-have had a large dropff like Bogut and DeMarre Carroll are so high.
+Note that it uses the best mark in each category from the last 3 seasons, so that's why guys who
+have had a large dropff like Bogut and DeMarre Carroll are so high. Doesn't take into account 
+career trends in that sense.
 
 1. Stephen Curry (16.06740442563067)
 2. James Harden (14.71370175520816)

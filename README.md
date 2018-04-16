@@ -5,8 +5,7 @@ A helper for 9-cat leagues.
 ## Approximate total ranking list, done using sum of total standard deviations in all 9 categories
 
 Note that it uses the best mark in each category from the last 3 seasons, so that's why guys who
-have had a large dropoff like Bogut and DeMarre Carroll are so high. Doesn't take into account 
-career trends in that sense.
+have had dropoffs like Whiteside, Millsap, Bogut, and Carroll are so high. In that sense, the model doesn't take into account career trends.
 
 1. Stephen Curry (16.06740442563067)
 2. James Harden (14.71370175520816)

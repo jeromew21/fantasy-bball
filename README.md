@@ -5,7 +5,7 @@ A helper for 9-cat leagues.
 ## Approximate total ranking list, done using sum of total standard deviations in all 9 categories
 
 Note that it uses the best mark in each category from the last 3 seasons, so that's why guys who
-have had a large dropff like Bogut and DeMarre Carroll are so high. Doesn't take into account 
+have had a large dropoff like Bogut and DeMarre Carroll are so high. Doesn't take into account 
 career trends in that sense.
 
 1. Stephen Curry (16.06740442563067)

@@ -229,7 +229,6 @@ def calcDeviations():
     print(devs)
     print(means)
 
-
 def sigmaRank():
     players = allPlayers()
     players = sorted(players, key=lambda p: p.getTotalSigmas())
@@ -238,3 +237,6 @@ def sigmaRank():
     for player in points:
         print(i, player)
         i += 1
+
+def debug():
+    sigmaRank()

@@ -230,9 +230,11 @@ def calcDeviations():
     print(means)
 
 
-def debug():
+def sigmaRank():
     players = allPlayers()
-    players = sorted(players, key=lambda p: int(p.getTotalSigmas()))
+    players = sorted(players, key=lambda p: p.getTotalSigmas())
     points = reversed(['{0} ({1})'.format(p.name, p.getTotalSigmas()) for p in players])
-    for i in range(1, 240):
-        print(i, next(points))
+    i = 1
+    for player in points:
+        print(i, player)
+        i += 1

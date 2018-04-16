@@ -1,13 +1,17 @@
 from bs4 import BeautifulSoup
-import requests
+import requests, pickle, sys
 
 ROOT_URL = 'https://www.basketball-reference.com'
 LAST_YEAR = 2018
 LOG_FILE = 'log.txt'
+SAVEFILE = 'league.dat'
 
 class League:
     def __init__(self):
         self.teams = []
+        self.allPlayers = []
+    def viewTeams(self):
+        print(self.teams)
 
 class Team:
     def __init__(self):
@@ -71,6 +75,17 @@ def getAllActivePlayerURLS():
         f.write('\n'.join(urls))
         f.close()
     return urls
+
+def save(lg):
+    savefile = open(SAVEFILE, "wb")
+    pickle.dump(lg, savefile)
+    savefile.close()
+    sys.exit()
+
+def load():
+    savefile = open(SAVEFILE, "rb")
+    return pickle.load(savefile)
+
 
 def log(l):
     with open(LOG_FILE, "a") as f:

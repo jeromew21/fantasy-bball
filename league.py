@@ -235,7 +235,7 @@ def sigmaRank():
     points = reversed(['{0} ({1})'.format(p.name, p.getTotalSigmas()) for p in players])
     i = 1
     for player in points:
-        print(i, player)
+        print(str(i) + ".", player)
         i += 1
 
 def debug():

@@ -101,30 +101,52 @@ class Player:
         self.totals = []
     @property
     def lastYearTotals(self):
-        self.totals = [i for i in self.totals if i]
         return self.totals[0]
     def getLastYearStat(self, stat):
         if len(self.totals) > 0:
             return self.totals[0].get(stat, 0)
         return 0
     def calcRisk(self):
+        result = {
+            'text': 'low',
+            'value': 0,
+            'trend': 0,
+            'age': 0,
+            'avg_games_missed': 0
+        }
         if len(self.totals) > 0:
             age = int(self.totals[0].get('age', 0))
             risk = 0
-            avg_missed = numpy.mean([82 - d.get('g', 82) for d in self.totals])
+            avg_missed = numpy.mean([82 - d.get('g', 0) for d in self.totals])
+            fg_trend = 0 #crude, but should be useful 
+            activeYears = [i for i in self.totals if i]
+            if len(activeYears) > 1:
+                thisYearFg = activeYears[0].get('fg_pct', 0)
+                lastYearFg = activeYears[-1].get('fg_pct', 0)
+                if lastYearFg > thisYearFg:
+                    fg_trend = (lastYearFg - thisYearFg) * 400
+
             risk += (avg_missed / 82) * 20
-            avg_missed = ' ' +str(int(avg_missed))
-            if age > 31:
-                risk += age - 31
+            risk += fg_trend
+            if age > 30:
+                risk += age - 30
+
+            result['trend'] = fg_trend
+            result['age'] = age
+            result['avg_games_missed'] = avg_missed
+            result['value'] = int(risk)
+
             if risk >= 10:
-                return 'very high'
-            if risk >= 8:
-                return 'high'
-            if risk >= 5:
-                return 'medium'
-            if risk >= 3:
-                return 'some'
-            return 'low'
+                result['text'] = 'very high'
+            elif risk >= 8:
+                result['text'] = 'high'
+            elif risk >= 5:
+                result['text'] = 'medium'
+            elif risk >= 3:
+                result['text'] = 'some'
+            elif risk < 1:
+                result['text'] = 'none'
+        return result
     def getBestYearStat(self, stat):
         if len(self.totals) > 0:
             if stat == 'tov':
@@ -306,10 +328,10 @@ def calcTotals():
         mean = numpy.mean(numpy.array(trials))
         print("avg", cat, mean)
 
-def rankBy(cat):
+def rankBy(cat, limit):
     players = allPlayers()
     players = sorted(players, key=lambda p: p.getSigma(cat))
-    points = reversed(['{0} ({1})'.format(p.name, p.getSigma(cat)) for p in players])
+    points = list(reversed(['{0} ({1})'.format(p.name, p.getSigma(cat)) for p in players]))[0:limit]
     i = 1
     for player in points:
         print(str(i) + ".", player)
@@ -318,11 +340,12 @@ def rankBy(cat):
 def sigmaRank(limit):
     players = allPlayers()
     players = sorted(players, key=lambda p: p.getTotalSigmas())
-    points = list(reversed(['{0} ({1} σ) ({2} risk)'
+    points = list(reversed(['{0} ({1} σ) (risk: {3} - {2})'
         .format(
             p.name, 
             str(p.getTotalSigmas())[0:5],
-            p.calcRisk()
+            p.calcRisk()['text'],
+            p.calcRisk()['value']
         ) for p in players]))[0:limit]
     i = 1
     for player in points:
@@ -330,4 +353,5 @@ def sigmaRank(limit):
         i += 1
 
 def debug():
+    #rankBy('fg_pct', 100)
     sigmaRank(1000)

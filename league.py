@@ -18,9 +18,15 @@ CATERGORIES = (
     'tov'
 )
 
+AVG_FG = 2272
+AVG_FGA = 4966
+
+AVG_FT = 1068
+AVG_FTM = 1406
+
 MEANS = {
-    'fg_pct': 0.4520048309178744, #fix this 
-    'ft_pct': 0.7212995169082126, #and this
+    'fg_pct': 0.0016226219996625043,
+    'ft_pct': 0.00400372293483541,
     'pts': 571.3220611916264,
     'trb': 237.743961352657, 
     'ast': 127.23349436392914,
@@ -31,8 +37,8 @@ MEANS = {
 }
 
 DEVIATIONS = { #Pulled from calcDeviations
-    'fg_pct': 0.1311215646297807,
-    'ft_pct': 0.22473424022081043,
+    'fg_pct': 0.006469683049730239,
+    'ft_pct': 0.01684039370047883,
     'pts': 509.81549753433967,
     'trb': 213.96595621370744,
     'ast': 143.3842800329773, 
@@ -90,7 +96,7 @@ class Player:
             for stat in ('tov',):
                 total += self.getSigma(stat)
             return total
-        return 0
+        return -99999999
     def getTotalFantasyPoints(self): #Crude totals
         if len(self.totals) > 0:
             total = 0
@@ -106,6 +112,12 @@ class Player:
         return '{0}'.format(self.name)
     def __repr__(self):
         return 'Player {0}'.format(self.name)
+
+def convertToContrib(t, makes, attempts):
+    if t == 'fg':
+        return (AVG_FG / AVG_FGA) - ((AVG_FG - makes) / (AVG_FGA  - attempts))
+    else:
+        return (AVG_FT / AVG_FTM) - ((AVG_FT - makes) / (AVG_FTM  - attempts))
 
 def playerFromURL(url):
     #on BBR, the table is commented out.. maybe to stop scrapers like me.
@@ -145,6 +157,9 @@ def playerFromURL(url):
                     except:
                         contents = str(contents)
                     rowDict[str(col['data-stat'])] = contents
+                if rowDict:
+                    rowDict['fg_pct'] = convertToContrib('fg', rowDict['fg'], rowDict['fga'])
+                    rowDict['ft_pct'] = convertToContrib('ft', rowDict['ft'], rowDict['fta'])
                 p.totals.append(rowDict)
             i += 1
         return p
@@ -226,8 +241,27 @@ def calcDeviations():
         arr = numpy.array([p.getBestYearStat(cat) for p in players])
         devs[cat] = numpy.std(arr)
         means[cat] = numpy.mean(arr)
+    print("Deviations")
     print(devs)
+    print("Means")
     print(means)
+
+def calcTotals():
+    for cat in ('fg', 'fga', 'ft', 'fta'):
+        trials = []
+        for i in range(10000):
+            trials.append(sum(numpy.random.choice([p.getBestYearStat(cat) for p in players[:200]], 10)))
+        mean = numpy.mean(numpy.array(trials))
+        print("avg", cat, mean)
+
+def rankBy(cat):
+    players = allPlayers()
+    players = sorted(players, key=lambda p: p.getSigma(cat))
+    points = reversed(['{0} ({1})'.format(p.name, p.getSigma(cat)) for p in players])
+    i = 1
+    for player in points:
+        print(str(i) + ".", player)
+        i += 1
 
 def sigmaRank():
     players = allPlayers()

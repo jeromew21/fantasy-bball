@@ -6,6 +6,40 @@ LAST_YEAR = 2018
 LOG_FILE = 'log.txt'
 SAVE_DIR = 'data/'
 OFFLINE_PAGES = 'offline_pages/'
+
+YEARS_PAST = 3
+
+ALL_CATEGORIES = (
+    'season',
+    'age',
+    'pos',
+    'g',
+    'gs',
+    'mp',
+    'fg',
+    'fga',
+    'fg_pct',
+    'fg3',
+    'fg3a',
+    'fg3_pct',
+    'fg2',
+    'fg2a',
+    'fg2_pct',
+    'efg_pct',
+    'ft',
+    'fta',
+    'ft_pct',
+    'orb',
+    'drb',
+    'trb',
+    'ast',
+    'stl',
+    'blk',
+    'tov',
+    'pf',
+    'pts'
+)
+
 CATERGORIES = (
     'fg_pct', 
     'ft_pct',
@@ -73,6 +107,24 @@ class Player:
         if len(self.totals) > 0:
             return self.totals[0].get(stat, 0)
         return 0
+    def calcRisk(self):
+        if len(self.totals) > 0:
+            age = int(self.totals[0].get('age', 0))
+            risk = 0
+            avg_missed = numpy.mean([82 - d.get('g', 82) for d in self.totals])
+            risk += (avg_missed / 82) * 20
+            avg_missed = ' ' +str(int(avg_missed))
+            if age > 31:
+                risk += age - 31
+            if risk >= 10:
+                return 'very high'
+            if risk >= 8:
+                return 'high'
+            if risk >= 5:
+                return 'medium'
+            if risk >= 3:
+                return 'some'
+            return 'low'
     def getBestYearStat(self, stat):
         if len(self.totals) > 0:
             if stat == 'tov':
@@ -138,7 +190,7 @@ def playerFromURL(url):
         name = soup.find('h1', {'itemprop': 'name'}).contents[0]
         p = Player(name)
         i = 0
-        while i <= 2:
+        while i < YEARS_PAST:
             currentYear = LAST_YEAR - i
             tableRow = soup.find('tr', {'id': 'totals.{0}'.format(currentYear)})
             if tableRow:
@@ -263,14 +315,19 @@ def rankBy(cat):
         print(str(i) + ".", player)
         i += 1
 
-def sigmaRank():
+def sigmaRank(limit):
     players = allPlayers()
     players = sorted(players, key=lambda p: p.getTotalSigmas())
-    points = reversed(['{0} ({1})'.format(p.name, p.getTotalSigmas()) for p in players])
+    points = list(reversed(['{0} ({1} σ) ({2} risk)'
+        .format(
+            p.name, 
+            str(p.getTotalSigmas())[0:5],
+            p.calcRisk()
+        ) for p in players]))[0:limit]
     i = 1
     for player in points:
         print(str(i) + ".", player)
         i += 1
 
 def debug():
-    sigmaRank()
+    sigmaRank(1000)

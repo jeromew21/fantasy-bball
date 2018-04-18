@@ -82,17 +82,49 @@ DEVIATIONS = { #Pulled from calcDeviations
     'tov': 68.3569595733988
 }
 
+def int_input(p, r):
+    try:
+        i = int(input(p))
+        if i in r:
+            return i
+        return int_input(p, r)
+    except:
+        return int_input(p, r)
 
 class League:
     def __init__(self):
         self.teams = []
         self.allPlayers = []
+        self.name = input("League name:") or "Untitled League"
+        size = int_input("team size:", range(5, 20))
+        for _ in range(int_input("Num teams [1-29]:", range(1, 30))):
+            self.teams.append(Team(input("Team name:"), size))
+        self.viewTeams()
     def viewTeams(self):
-        print(self.teams)
+        print("{0}'s Teams".format(self.name))
+        self.teams = list(reversed(sorted(self.teams, key=lambda t: t.totalPoints())))
+        for i, t in enumerate(self.teams):
+            print('\t{0}. {1}'.format(i, t))
+    def teamDetails(self, index):
+        if type(index) == int and index >= 0 and index < len(self.teams):
+            team = self.teams[index]
+            print(team)
 
 class Team:
-    def __init__(self):
+    def __init__(self, name, size):
         self.roster = []
+        self.name = name
+        self.size = size
+    def totalPoints(self):
+        return sum([p.getRating() for p in self.roster])
+    def addPlayer(self, p):
+        if len(self.roster) >= self.size:
+            print('Roster full!')
+        else:
+            self.roster.append(p)
+            print('Added')
+    def __str__(self):
+        return '{0} ({1})'.format(self.name, self.totalPoints())
 
 class Player:
     def __init__(self, name):
@@ -102,6 +134,8 @@ class Player:
     @property
     def lastYearTotals(self):
         return self.totals[0]
+    def getRating(self):
+        return self.getWeightedSigmas()
     def getLastYearStat(self, stat):
         if len(self.totals) > 0:
             return self.totals[0].get(stat, 0)
@@ -408,4 +442,3 @@ def debug():
     #rankBy('fg_pct', 1000, True)
     sigmaRank(150)
     weightedRank(150)
-    

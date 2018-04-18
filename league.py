@@ -106,6 +106,8 @@ class Player:
         if len(self.totals) > 0:
             return self.totals[0].get(stat, 0)
         return 0
+    def getWeightedSigmas(self): #Increases the weight of last season
+        return (self.getLastYearSigmas() + self.getTotalSigmas()) / 2
     def calcRisk(self):
         result = {
             'text': 'low',
@@ -119,6 +121,7 @@ class Player:
             risk = 0
             avg_missed = numpy.mean([82 - d.get('g', 0) for d in self.totals])
             fg_trend = 0 #crude, but should be useful 
+            mpg_trend = 0
             activeYears = [i for i in self.totals if i]
             if len(activeYears) > 1:
                 thisYearFg = activeYears[0].get('fg_pct', 0)
@@ -126,8 +129,16 @@ class Player:
                 if lastYearFg > thisYearFg:
                     fg_trend = (lastYearFg - thisYearFg) * 400
 
+                thisYearMPG = activeYears[0].get('mp', 0) / activeYears[0].get('g', 82)
+                lastYearMPG = activeYears[-1].get('mp', 0) / activeYears[-1].get('g', 82)
+                if lastYearMPG > thisYearMPG:
+                    mpg_trend = (lastYearMPG - thisYearMPG) * 0.7
+
+            #TODO: take into acc MPG decrease too!! 
+
             risk += (avg_missed / 82) * 20
             risk += fg_trend
+            risk += mpg_trend
             if age > 30:
                 risk += age - 30
 
@@ -136,15 +147,15 @@ class Player:
             result['avg_games_missed'] = avg_missed
             result['value'] = int(risk)
 
-            if risk >= 10:
+            if risk >= 15:
                 result['text'] = 'very high'
-            elif risk >= 8:
+            elif risk >= 10:
                 result['text'] = 'high'
-            elif risk >= 5:
+            elif risk >= 7:
                 result['text'] = 'medium'
             elif risk >= 3:
                 result['text'] = 'some'
-            elif risk < 1:
+            elif risk <= 1:
                 result['text'] = 'none'
         return result
     def getBestYearStat(self, stat):
@@ -153,9 +164,11 @@ class Player:
                 return min([d.get(stat, 0) for d in self.totals])
             return max([d.get(stat, 0) for d in self.totals])
         return 0
-    def getSigma(self, stat):
+    def getSigma(self, stat, bestYear=True):
         if len(self.totals) > 0:
             val = self.getBestYearStat(stat)
+            if not bestYear:
+                val = self.getLastYearStat(stat)
             diff = val - MEANS[stat]
             if stat == 'tov':
                 diff = -1 * diff
@@ -169,6 +182,15 @@ class Player:
                 total += self.getSigma(stat)
             for stat in ('tov',):
                 total += self.getSigma(stat)
+            return total
+        return -99999999
+    def getLastYearSigmas(self):
+        if len(self.totals) > 0:
+            total = 0
+            for stat in ('pts', 'trb', 'ast', 'fg3', 'stl', 'blk', 'fg_pct', 'ft_pct'):
+                total += self.getSigma(stat, False)
+            for stat in ('tov',):
+                total += self.getSigma(stat, False)
             return total
         return -99999999
     def getTotalFantasyPoints(self): #Crude totals
@@ -328,22 +350,52 @@ def calcTotals():
         mean = numpy.mean(numpy.array(trials))
         print("avg", cat, mean)
 
-def rankBy(cat, limit):
+def rankBy(cat, limit=1000, bestYear=True):
     players = allPlayers()
-    players = sorted(players, key=lambda p: p.getSigma(cat))
-    points = list(reversed(['{0} ({1})'.format(p.name, p.getSigma(cat)) for p in players]))[0:limit]
+    players = sorted(players, key=lambda p: p.getSigma(cat, bestYear))
+    points = list(reversed(['{0} ({1} σ)'.format(p.name, p.getSigma(cat, bestYear)) for p in players]))[0:limit]
     i = 1
     for player in points:
         print(str(i) + ".", player)
         i += 1
 
-def sigmaRank(limit):
+def rankByRisk(limit=1000):
     players = allPlayers()
-    players = sorted(players, key=lambda p: p.getTotalSigmas())
+    players = sorted(players, key=lambda p: p.calcRisk()['value'])
+    points = list(reversed(['{0} ({1})'.format(p.name, p.calcRisk()['value']) for p in players]))[0:limit]
+    i = 1
+    for player in points:
+        print(str(i) + ".", player)
+        i += 1
+
+def lastYearRank(limit=1000):
+    sigmaRank(limit, False)
+
+def sigmaRank(limit=1000, bestYear=True):
+    players = allPlayers()
+    if bestYear:
+        players = sorted(players, key=lambda p: p.getTotalSigmas())
+    else:
+        players = sorted(players, key=lambda p: p.getLastYearSigmas())
     points = list(reversed(['{0} ({1} σ) (risk: {3} - {2})'
         .format(
             p.name, 
-            str(p.getTotalSigmas())[0:5],
+            str(p.getTotalSigmas() if bestYear else p.getLastYearSigmas())[0:5],
+            p.calcRisk()['text'],
+            p.calcRisk()['value']
+        ) for p in players]))[0:limit]
+    i = 1
+    for player in points:
+        print(str(i) + ".", player)
+        i += 1
+
+def weightedRank(limit=1000):
+    players = allPlayers()
+    players = sorted(players, key=lambda p: p.getWeightedSigmas())
+    points = list(reversed(['{0} ({1} σ) (risk: {3} - {2})'
+        .format(
+            p.name, 
+            str(p.getWeightedSigmas())[0:5],
             p.calcRisk()['text'],
             p.calcRisk()['value']
         ) for p in players]))[0:limit]
@@ -353,5 +405,7 @@ def sigmaRank(limit):
         i += 1
 
 def debug():
-    #rankBy('fg_pct', 100)
-    sigmaRank(1000)
+    #rankBy('fg_pct', 1000, True)
+    sigmaRank(150)
+    weightedRank(150)
+    

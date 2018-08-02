@@ -9,8 +9,11 @@ OFFLINE_PAGES = os.path.join("data", "bbref_cache")
 PLAYERS_DATA = os.path.join("data", "players_data")
 URL_INDEX = os.path.join("data", "player_urls.txt")
 
-def playerFromURL(url):
+def playerFromUrl(url, quiet=False):
     #on BBR, the table is commented out.. maybe to stop scrapers like me.
+    if quiet:
+        def print(*x):
+            return None
     filename = os.path.join(OFFLINE_PAGES, url.split("/")[-1])
     print()
     try:
@@ -62,12 +65,14 @@ def playerFromURL(url):
         print("URL read from {0} ({1}) failed".format(name, url))
         print(str(e) + "\n")
 
-def downloadAll(cache_objects=False):
-    urls = []
+def allPlayerUrls():
     with open(URL_INDEX, 'r') as f:
-        urls = [url for url in f.read().split('\n') if url]
+        return [url for url in f.read().split('\n') if url]
+
+def downloadAll(cache_objects=False):
+    urls = allPlayerUrls()
     for url in urls:
-        player = playerFromURL(url)
+        player = playerFromUrl(url)
         if cache_objects:
             filename = os.path.join(PLAYERS_DATA, player.name.replace(" ", "-") + ".json")
             print("Saving object to", filename)
@@ -78,4 +83,17 @@ def downloadAll(cache_objects=False):
             }))
             f.close()
             print("Saved object")
-    
+
+def allPlayers(cached=True):
+    if cached:
+        try:
+            for k in os.listdir(PLAYERS_DATA):
+                with open(os.path.join(PLAYERS_DATA, k)) as f:
+                    js = f.read()
+                    yield Player.from_json(js)
+        except:
+            print("Must rebuild player cache. Try running downloadAll()")
+    else:
+        for url in allPlayerUrls():
+            yield playerFromUrl(url, quiet=True)
+            

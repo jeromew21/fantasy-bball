@@ -7,9 +7,15 @@ from player import *
 
 OFFLINE_PAGES = os.path.join("data", "bbref_cache")
 PLAYERS_DATA = os.path.join("data", "players_data")
+
+for path in (OFFLINE_PAGES, PLAYERS_DATA):
+    if not os.path.isdir(path):
+        os.makedirs(path)
+
 URL_INDEX = os.path.join("data", "player_urls.txt")
 
 def playerFromUrl(url, quiet=False):
+
     #on BBR, the table is commented out.. maybe to stop scrapers like me.
     if quiet:
         def print(*x):
@@ -96,4 +102,3 @@ def allPlayers(cached=True):
     else:
         for url in allPlayerUrls():
             yield playerFromUrl(url, quiet=True)
-            

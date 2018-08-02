@@ -1,2 +1,3 @@
-data/players_data
+data/players_data/*
+data/bbref_cache/*
 __pycache__

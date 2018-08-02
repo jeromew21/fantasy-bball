@@ -246,8 +246,7 @@ class Player:
 def convertToContrib(t, makes, attempts):
     if t == 'fg':
         return (AVG_FG / AVG_FGA) - ((AVG_FG - makes) / (AVG_FGA  - attempts))
-    else:
-        return (AVG_FT / AVG_FTM) - ((AVG_FT - makes) / (AVG_FTM  - attempts))
+    return (AVG_FT / AVG_FTM) - ((AVG_FT - makes) / (AVG_FTM  - attempts))
 
 def playerFromURL(url):
     #on BBR, the table is commented out.. maybe to stop scrapers like me.

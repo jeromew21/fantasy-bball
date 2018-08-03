@@ -53,4 +53,26 @@ def convertToContrib(t, makes, attempts):
     if t.lower() == 'fg':
         return (AVG_FG / AVG_FGA) - ((AVG_FG - makes) / (AVG_FGA  - attempts))
     return (AVG_FT / AVG_FTM) - ((AVG_FT - makes) / (AVG_FTM  - attempts))
-    
+
+def get_choice(arr):
+    return arr[0]
+
+reformats = {
+    'fg_pct': "FG%",
+    "ft_pct": "FT%",
+    "fg3": "3PM",
+    "trb": "REB"
+}
+
+def reformat_cat(c):
+    if reformats.get(c.lower()):
+        return reformats[c]
+    return c.upper()
+
+def suffix(x):
+    lookup = {
+        1: 'st',
+        2: 'nd',
+        3: 'rd'
+    }
+    return str(x) + lookup.get(x % 10, "th")

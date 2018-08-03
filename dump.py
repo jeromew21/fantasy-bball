@@ -108,5 +108,7 @@ def allPlayers(cached=True):
 def listAllPlayers():
     return list(allPlayers())
 
-def playerHashTable():
-    return {p.name_hash: p for p in allPlayers()}
+def playerHashTable(players=None):
+    if not players:
+        players = allPlayers()
+    return {p.name_hash: p for p in players}

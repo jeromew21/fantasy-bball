@@ -1,7 +1,7 @@
 LAST_YEAR = 2018
 
 AVG_FG = 2272
-AVG_FGA = 4966
+AVG_FGA = 4966 #The average number of shots a fantasy team shoots per season.
 
 AVG_FT = 1068
 AVG_FTM = 1406
@@ -37,7 +37,7 @@ ALL_CATEGORIES = (
     'pts'
 )
 
-CATERGORIES = (
+CATEGORIES = (
     'fg_pct', 
     'ft_pct',
     'pts', 

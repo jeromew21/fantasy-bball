@@ -14,12 +14,9 @@ for path in (OFFLINE_PAGES, PLAYERS_DATA):
 
 URL_INDEX = os.path.join("data", "player_urls.txt")
 
-def playerFromUrl(url, quiet=False):
+def playerFromUrl(url):
 
-    #on BBR, the table is commented out.. maybe to stop scrapers like me.
-    if quiet:
-        def print(*x):
-            return None
+    # on BBR, the table is commented out.. maybe to stop scrapers like me.
     filename = os.path.join(OFFLINE_PAGES, url.split("/")[-1])
     print()
     try:
@@ -28,9 +25,9 @@ def playerFromUrl(url, quiet=False):
             f.close()
             print("Reading from file", filename)
     except:
-        time.sleep(1) #in case of rate limiting
+        time.sleep(1) # in case of rate limiting
         html = requests.get(url).text
-        html = html.replace('<!--', '<div>').replace('-->', '</div>') #fuck you!
+        html = html.replace('<!--', '<div>').replace('-->', '</div>') # remove comments
         print("Falling back and downloading from URL", url)
 
     try:
@@ -61,9 +58,14 @@ def playerFromUrl(url, quiet=False):
                     except:
                         pass
                     rowDict[str(col['data-stat'])] = raw
-                if rowDict:
+
+                if rowDict: 
+                    # Edit percentage stats to reflect overall contribution
+                    # ie, weight for volume
                     rowDict['fg_pct'] = convertToContrib('fg', rowDict['fg'], rowDict['fga'])
                     rowDict['ft_pct'] = convertToContrib('ft', rowDict['ft'], rowDict['fta'])
+                    # Change turnovers to negative
+                    rowDict['tov'] = -1 * rowDict['tov']
                 player.season_totals.append(rowDict)
             i += 1
         return player
@@ -79,7 +81,7 @@ def downloadAll(cache_objects=True):
     urls = allPlayerUrls()
     for url in urls:
         player = playerFromUrl(url)
-        if cache_objects:
+        if cache_objects: # Save as JSON
             filename = os.path.join(PLAYERS_DATA, player.name.replace(" ", "-") + ".json")
             print("Saving object to", filename)
             f = open(filename, "w")
@@ -91,7 +93,7 @@ def downloadAll(cache_objects=True):
             print("Saved object")
 
 def allPlayers(cached=True):
-    if cached:
+    if cached: # read from saved json files
         try:
             for k in os.listdir(PLAYERS_DATA):
                 with open(os.path.join(PLAYERS_DATA, k)) as f:
@@ -99,9 +101,12 @@ def allPlayers(cached=True):
                     yield Player.from_json(js)
         except:
             print("Must rebuild player cache. Try running downloadAll()")
-    else:
+    else: # either read from saved HTML or from internet
         for url in allPlayerUrls():
-            yield playerFromUrl(url, quiet=True)
+            yield playerFromUrl(url)
 
 def listAllPlayers():
     return list(allPlayers())
+
+def playerHashTable():
+    return {p.name_hash: p for p in allPlayers()}

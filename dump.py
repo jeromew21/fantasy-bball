@@ -75,7 +75,7 @@ def allPlayerUrls():
     with open(URL_INDEX, 'r') as f:
         return [url for url in f.read().split('\n') if url]
 
-def downloadAll(cache_objects=False):
+def downloadAll(cache_objects=True):
     urls = allPlayerUrls()
     for url in urls:
         player = playerFromUrl(url)
@@ -102,3 +102,6 @@ def allPlayers(cached=True):
     else:
         for url in allPlayerUrls():
             yield playerFromUrl(url, quiet=True)
+
+def listAllPlayers():
+    return list(allPlayers())

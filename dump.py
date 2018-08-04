@@ -31,10 +31,10 @@ def playerFromUrl(url):
         print("Falling back and downloading from URL", url)
 
     try:
-        with open(filename , "w") as f:
+        with open(filename , "w", encoding='utf-8') as f:
             f.write(html)
             f.close()
-        soup = BeautifulSoup(html, 'lxml')
+        soup = BeautifulSoup(html)
         name = soup.find('h1', {'itemprop': 'name'}).contents[0]
         print("Parsing", name)
         player = Player(name)
@@ -70,11 +70,11 @@ def playerFromUrl(url):
             i += 1
         return player
     except Exception as e: 
-        print("URL read from {0} ({1}) failed".format(name, url))
+        print("URL read from {0} failed".format(url))
         print(str(e) + "\n")
 
 def allPlayerUrls():
-    with open(URL_INDEX, 'r') as f:
+    with open(URL_INDEX, 'r', encoding='utf-8') as f:
         return [url for url in f.read().split('\n') if url]
 
 def downloadAll(cache_objects=True):
@@ -84,7 +84,7 @@ def downloadAll(cache_objects=True):
         if cache_objects: # Save as JSON
             filename = os.path.join(PLAYERS_DATA, player.name.replace(" ", "-") + ".json")
             print("Saving object to", filename)
-            f = open(filename, "w")
+            f = open(filename, "w", encoding='utf-8')
             f.write(json.dumps({
                 "name": player.name,
                 "season_totals": player.season_totals

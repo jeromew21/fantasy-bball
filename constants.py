@@ -9,6 +9,7 @@ AVG_FTM = 1406
 ALL_CATEGORIES = (
     'season',
     'age',
+    "team_id",
     'pos',
     'g',
     'gs',

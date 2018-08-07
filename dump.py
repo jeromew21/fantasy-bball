@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
 import requests
 import os, time, json
+import re
 
 from constants import *
 from player import *
@@ -37,6 +38,8 @@ def playerFromUrl(url):
         soup = BeautifulSoup(html)
         name = soup.find('h1', {'itemprop': 'name'}).contents[0]
         print("Parsing", name)
+        currentTeam = soup.find('strong', text=re.compile("Team"))
+        print(currentTeam)
         player = Player(name)
         i = 0
         while i < 25:

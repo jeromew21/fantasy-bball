@@ -24,6 +24,7 @@ class Player:
         self.last_year_zscore = {}
         self.last_year_totals = {}
         self.rank = None
+        self.team = None
     
     def init_props(self, data):
         self.raw_score = self.calc_raw_score(data)

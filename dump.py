@@ -15,11 +15,13 @@ for path in (OFFLINE_PAGES, PLAYERS_DATA):
 
 URL_INDEX = os.path.join("data", "player_urls.txt")
 
-def playerFromUrl(url):
+def playerFromUrl(url, forceDownload=False):
     # on BBR, the table is commented out.. maybe to stop scrapers like me.
     filename = os.path.join(OFFLINE_PAGES, url.split("/")[-1])
     print()
     try:
+        if forceDownload:
+            raise Exception("continue")
         with open(filename, "r") as f:
             html = f.read()
             f.close()
@@ -83,10 +85,10 @@ def allPlayerUrls():
     with open(URL_INDEX, 'r', encoding='utf-8') as f:
         return [url for url in f.read().split('\n') if url]
 
-def downloadAll(cache_objects=True):
+def downloadAll(cache_objects=True, redownload=False):
     urls = allPlayerUrls()
     for url in urls:
-        player = playerFromUrl(url)
+        player = playerFromUrl(url, redownload)
         if cache_objects: # Save as JSON
             filename = os.path.join(PLAYERS_DATA, player.name.replace(" ", "-") + ".json")
             print("Saving object to", filename)

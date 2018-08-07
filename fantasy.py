@@ -19,12 +19,12 @@ class Fantasy:
 
         for p in self.players:
             p.init_props(self.stat_data)
-            team = p.season_totals[0].get("team_id")
-            p.team = team
-            if team in self.teams:
-                self.teams[team].append(p)
-            else:
-                self.teams[team] = [p]
+            team = p.team
+            if team:
+                if team in self.teams:
+                    self.teams[team].append(p)
+                else:
+                    self.teams[team] = [p]
         self.table = playerHashTable(self.players)
 
     def all_stat_values(self, stat):

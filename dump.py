@@ -16,7 +16,6 @@ for path in (OFFLINE_PAGES, PLAYERS_DATA):
 URL_INDEX = os.path.join("data", "player_urls.txt")
 
 def playerFromUrl(url):
-
     # on BBR, the table is commented out.. maybe to stop scrapers like me.
     filename = os.path.join(OFFLINE_PAGES, url.split("/")[-1])
     print()
@@ -35,12 +34,16 @@ def playerFromUrl(url):
         with open(filename , "w", encoding='utf-8') as f:
             f.write(html)
             f.close()
-        soup = BeautifulSoup(html)
+        soup = BeautifulSoup(html, 'lxml')
         name = soup.find('h1', {'itemprop': 'name'}).contents[0]
         print("Parsing", name)
-        currentTeam = soup.find('strong', text=re.compile("Team"))
-        print(currentTeam)
         player = Player(name)
+        team = None
+        teamNode = soup.find('strong', text=re.compile("Team")).nextSibling.nextSibling
+        teamChunks = [i for i in teamNode['href'].split("/") if i]
+        if teamChunks[0] == "teams":
+            team = teamChunks[1]
+        player.team = team
         i = 0
         while i < 25:
             currentYear = LAST_YEAR - i
@@ -90,6 +93,7 @@ def downloadAll(cache_objects=True):
             f = open(filename, "w", encoding='utf-8')
             f.write(json.dumps({
                 "name": player.name,
+                "current_team": player.team,
                 "season_totals": player.season_totals
             }))
             f.close()

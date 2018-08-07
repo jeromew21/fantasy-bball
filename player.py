@@ -39,6 +39,7 @@ class Player:
         data = json.loads(js)
         player = Player(data['name'])
         player.season_totals = data['season_totals']
+        player.team = data["current_team"]
         return player
     
     def list_stat(self, stat): 

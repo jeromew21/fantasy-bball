@@ -8,13 +8,23 @@ import random
 class Fantasy:
     def __init__(self):
         self.players = [p for p in allPlayers() if len(p.season_totals) > 0]
+
         self.stat_data = [{
             "stat": stat,
             "mean": self.calc_avg(stat),
             "sd": self.calc_sd(stat)
         } for stat in CATEGORIES]
+        
+        self.teams = {}
+
         for p in self.players:
             p.init_props(self.stat_data)
+            team = p.season_totals[0].get("team_id")
+            p.team = team
+            if team in self.teams:
+                self.teams[team].append(p)
+            else:
+                self.teams[team] = [p]
         self.table = playerHashTable(self.players)
 
     def all_stat_values(self, stat):
@@ -28,6 +38,12 @@ class Fantasy:
         if lastYear:
             np.std([p.last_year_totals.get(stat, 0) for p in self.players])
         return np.std(self.all_stat_values(stat))
+    
+    def depth_chart(self, team_name):
+        team = self.teams.get(team_name)
+        team = sorted(team, key=lambda player:player.raw_score, reverse=True)
+        for p in team:
+            print(p)
 
     def random_player(self):
         return random.choice(self.players)

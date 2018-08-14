@@ -26,6 +26,12 @@ class Player:
         self.rank = None
         self.team = None
     
+    def last_year_sigma(self, cat):
+        if self.last_year_zscore:
+            return self.last_year_zscore[cat]
+        else:
+            raise Exception("Improperly initialized player")
+
     def init_props(self, data):
         self.raw_score = self.calc_raw_score(data)
 

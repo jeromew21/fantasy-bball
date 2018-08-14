@@ -41,7 +41,7 @@ class Fantasy:
     
     def depth_chart(self, team_name):
         team = self.teams.get(team_name)
-        team = sorted(team, key=lambda player:player.raw_score, reverse=True)
+        team = sorted(team, key=lambda player: player.raw_score, reverse=True)
         for p in team:
             print(p)
 
@@ -55,13 +55,17 @@ class Fantasy:
         return get_choice(possible)
     def sort_by(self, func):
         return sorted(self.players, key=func)
-    def sort_by_raw(self, limit=100):
+    def sort_by_raw(self, limit=100, show=True):
+        result = []
         i = 1
         for p in reversed(self.sort_by(lambda player: player.raw_score)):
             p.rank = i
             if i <= limit:
-                print("{}. {}".format(i, p))
+                result.append(p)
+                if show:
+                    print("{}. {}".format(i, p))
             i += 1
+        return result
     def histogram(self, stat="total", limit=144):
         if stat == "total":
             v = np.array([p.raw_score for p in self.players[:limit]])

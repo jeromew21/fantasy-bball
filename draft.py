@@ -161,6 +161,11 @@ def frontend(d):
 
     
 if __name__ == "__main__":
-    d = Draft()
+    if len(sys.argv) >= 4:
+        args = [int(i) for i in sys.argv[1:]]
+        d = Draft(args[0], args[1], args[2])
+        print(args)
+    else:
+        d = Draft()
     frontend(d)
         

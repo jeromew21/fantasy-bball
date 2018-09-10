@@ -6,7 +6,7 @@ from constants import *
 from fantasy import *
 
 class Team:
-    SIZE = 12
+    SIZE = 13
     def __init__(self, name):
         self.name = name
         self.players = []
@@ -19,6 +19,7 @@ class Team:
                 "wins": 0, "losses": 0
             }
         self.lg =  None
+    
     @property
     def winning_percentage(self):
         try:
@@ -28,12 +29,14 @@ class Team:
             print("No games played")
         else:
             return "{:.2f}".format(pct)
-    def show(self):
+    
+    def show(self, verbose=False):
         print(self.name)
         print(", ".join([str(p) for p in self.players]))
-        print("Wins: {}".format(self.week_wins))
-        print("Losses: {}".format(self.week_losses))
-        print("Win Pct: {}".format(self.winning_percentage))
+        if verbose:
+            print("Wins: {}".format(self.week_wins))
+            print("Losses: {}".format(self.week_losses))
+            print("Win Pct: {}".format(self.winning_percentage))
         x = CATEGORIES
         y = [
             self.score(cat)
@@ -42,10 +45,13 @@ class Team:
         plt.bar(x, y)
         plt.title("{}'s Team Attributes (z-scores)".format(self.name))
         plt.show()
+    
     def _add_player(self, p):
         self.players.append(p)
+    
     def score(self, cat):
         return sum(p.last_year_sigma(cat) for p in self.players)
+    
     def play(self, oppo):
         cats = 0
         for cat in CATEGORIES:
@@ -64,6 +70,7 @@ class Team:
         else:
             self.week_losses += 1
             oppo.week_wins += 1
+    
     def add_player_by_name(self, name):
         player = self.lg.fan.search(name)
         if player:
@@ -71,6 +78,9 @@ class Team:
             self.lg.fan.players.remove(player)
             return True
         return False
+    
+    def add_player(self, p):
+        self._add_player(p)
 
 class League:
     def __init__(self):

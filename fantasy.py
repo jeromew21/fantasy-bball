@@ -29,11 +29,13 @@ class Fantasy:
 
     def all_stat_values(self, stat):
         return reduce(lambda x, y: x + y, [player.list_stat(stat) for player in self.players])
+    
     def calc_avg(self, stat, lastYear=True):
         if lastYear:
             np.average([p.last_year_totals.get(stat, 0) for p in self.players])
         # Using ALL years might yield a more accurate average
         return np.average(self.all_stat_values(stat))
+    
     def calc_sd(self, stat, lastYear=True):
         if lastYear:
             np.std([p.last_year_totals.get(stat, 0) for p in self.players])
@@ -47,14 +49,17 @@ class Fantasy:
 
     def random_player(self):
         return random.choice(self.players)
+
     def search(self, query):
         possible = [p for p in self.players if p.name.lower().startswith(query.lower())]
         if not possible:
             print("No player matching that search")
             return None
         return get_choice(possible)
+
     def sort_by(self, func):
         return sorted(self.players, key=func)
+
     def sort_by_raw(self, limit=100, show=True):
         result = []
         i = 1
@@ -66,6 +71,7 @@ class Fantasy:
                     print("{}. {}".format(i, p))
             i += 1
         return result
+
     def histogram(self, stat="total", limit=144):
         if stat == "total":
             v = np.array([p.raw_score for p in self.players[:limit]])
@@ -82,6 +88,7 @@ class Fantasy:
     def compare_last_year(self, p1, p2):
         assert isinstance(p1, Player) and isinstance(p2, Player)
         p1.compare(p2, self.stat_data, "last year")
+    
 
 fan = Fantasy()
 player = fan.random_player()

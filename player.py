@@ -66,6 +66,10 @@ class Player:
                 print(truncate(value, 4), end="|")
             print()
     
+    @property
+    def score(self):
+        return self.raw_score
+    
     def calc_raw_score(self, data):
         """ Sum of total contributions, last season"""
         total = 0
@@ -182,7 +186,7 @@ class Player:
                 self.name_hash,
                 suffix(self.rank)
             )
-        return "{} <{}>".format(self.name, self.name_hash)
+        return "{0}".format(self.name, self.name_hash)
 
     def __str__(self):
         return repr(self)

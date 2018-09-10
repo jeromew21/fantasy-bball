@@ -48,16 +48,25 @@ class Draft:
                 i += 1
         return player_costs
 
+def safe_input(s):
+    while True:
+        try:
+            cmd = input(s)
+            return cmd
+        except (KeyboardInterrupt, EOFError):
+            continue
+
 if __name__ == '__main__':
     print("Hello.")
     d = Draft()
     while True:
-        try:
-            cmd = input("draft >>> ").split(" ")
-        except KeyboardInterrupt, EOFError:
-            continue
+        cmd = safe_input("draft >>> ").split(" ")
         try:
             arg1 = cmd[0]
         except:
             print("bad command")
+            continue
+        if arg1 in ('exit', 'quit', 'q'):
+            if safe_input("Are you sure? >>> ").lower() == "y":
+                sys.exit()
         
